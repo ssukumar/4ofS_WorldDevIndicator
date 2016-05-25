@@ -28,6 +28,7 @@ class Data:
 		
 		trainData = trainData.replace(-1,np.nan);
 		trainData = trainData.fillna(trainData.mean())
+		print trainData.mean()
 		self.features = trainData.shape[1];
 		print self.features
 		trainData = trainData.as_matrix();
@@ -87,15 +88,18 @@ class Model:
 		model.add(Dense(self.neurons,input_dim = data.features,init = 'glorot_uniform', W_regularizer = l2(self.wd),activation=self.activation[0]));
 		model.add(Dropout(self.dropout));
 		model.add(Dense(1,activation = self.activation[1]));
-		model.add(Dropout(self.dropout));
 		model.compile(loss = self.errFunc, optimizer = self.optimizer);
 		
 		history = LossHistory()
 		
 		# Train the model
 		
-		model.fit(data.trainInputs, data.trainTargets, nb_epoch = self.epochs, batch_size = 100, callbacks = [history]);
+		model.fit(data.trainInputs, data.trainTargets, nb_epoch = self.epochs, batch_size = 32, callbacks = [history]);
 		predictions = model.predict(data.trainInputs);
+		
+		print '*****PREDICTIONS*****'
+		
+		print predictions
 		plt.figure()
 		plt.plot(history.losses)
 		plt.show()
@@ -103,7 +107,7 @@ class Model:
 		
 def main():
 	
-	activation = np.array(['sigmoid','relu'],dtype=object)
+	activation = np.array(['relu','relu'],dtype=object)
 	
 	error_function = 'mse'
 	optimizer_model = 'sgd'
@@ -112,7 +116,7 @@ def main():
 	
 	data1.inputPreprocess();
 	
-	model1 = Model(500,activation,optimizer_model);
+	model1 = Model(150,activation,optimizer_model);
 	
 	model1.modelTrainValidate(data1);
 	
