@@ -15,41 +15,34 @@ import matplotlib.pyplot as plt
 class Data:
     'Class for data object'
 	
-    def __init__(self,trainFile,trainLabelFile,valRatio):
+    def __init__(self,trainFile,trainLabelFile,valRatio,testFile=None):
         self.trainFile = trainFile
+        self.testFile = testFile
         self.trainLabelFile = trainLabelFile
-#       self.testFile = testFile
         self.valRatio = valRatio
 		
     def inputPreprocess(self):
         trainData = pd.read_csv(self.trainFile)
         trainLabel = pd.read_table(self.trainLabelFile,header = None)
-        # trainLabel_true = trainLabel.copy()
+        testData = pd.read_csv(self.testFile)
         # The number of input features	
 
         trainData = trainData.replace(-1,np.nan)
-        trainData_true = trainData.copy()
-        trainData_true = trainData.fillna(trainData.mean())
-        trainData['le_birth'] = trainLabel
-        # replace with robust covariance estimation from sklearn?
-
-        cov = np.array(trainData.corr(method='kendall'))
-        trainMat = np.random.multivariate_normal(trainData.mean(),cov,1000)
-        trainData = trainMat[:,:-1];
+        testData = testData.replace(-1,np.nan)
         self.features = trainData.shape[1];
-        trainLabel = trainMat[:,-1];
+        testData = testData.fillna(testData.mean())
+        trainData = trainData.fillna(trainData.mean())
 		# [self.trainInputs, self.valInputs, self.trainTargets, self.valTargets] = train_test_split(trainData,trainLabel ,test_size = self.valRatio)
 
-        self.trainInputs = trainData;
-        self.trainInputs_t = trainData_true.as_matrix()
-        self.trainTargets = trainLabel;
+        self.trainInputs = trainData.as_matrix()
+        self.testInputs = testData.as_matrix()
+        self.trainTargets = trainLabel.as_matrix()
         self.trainMean = np.mean(self.trainInputs,axis=0)
-        self.trainMeanT = np.mean(self.trainInputs_t,axis=0)
+        #self.testMean = np.mean(self.trainInputs_t,axis=0)
         tnStd = np.std(self.trainInputs,axis=0,dtype = np.float32)
-        self.tnStdT = np.std(self.trainInputs_t,axis=0,dtype = np.float32)
         self.trainStd = np.array(list(tnStd))
         self.trainInputs = z_score_inputs(self.trainInputs,self.trainMean,self.trainStd);
-        self.trainInputsT = z_score_inputs(self.trainInputs_t,self.trainMeanT,self.trainStdT)
+        self.testInputs = z_score_inputs(self.testInputs,self.trainMean,self.trainStd)
 # 		self.valInputs = z_score_inputs(self.valInputs,self.trainMean,self.trainStd);
 		
 		
@@ -57,17 +50,15 @@ def z_score_inputs(Inputs, Mean, StdDev):
     """ 
 		Pre-process inputs by making it mean zero and unit standard deviation
     """
-# 	for i in range(StdDev.size):
-		# if (StdDev[i] < 0.02):
-# 			StdDev[i] = 0.02
-	
     Inputs = np.divide((Inputs-Mean),StdDev)
     return Inputs
 	
 	
 class Model:
 
-    def __init__(self,neurons,activation,optimizer,errFunc = 'mse',epochs=200, wd= 0.01,dropout = 0.0):
+    def __init__(self,neurons,activation,
+                 optimizer,errFunc = 'mse',
+                 epochs=200, wd= 0.01,dropout = 0.0):
         self.neurons = neurons;
         self.errFunc = errFunc;
         self.activation = activation;
@@ -101,11 +92,12 @@ class Model:
 		# Train the model
 		
         model.fit(data.trainInputs, data.trainTargets, nb_epoch = self.epochs, batch_size = 32, callbacks = [history]);
-        predictions = model.predict(data.trainInputsT);
+        predictions = model.predict(data.testInputs);
 		
         print '*****PREDICTIONS*****'
 		
         print predictions
+        np.savetxt('./predictions.csv', predictions,delimiter=',')
         plt.figure()
         plt.plot(history.losses)
         plt.show()
@@ -118,7 +110,7 @@ def main():
     error_function = 'mse'
     optimizer_model = 'sgd'
 	
-    data1 = Data('train.csv','train_labels.txt',0.30);
+    data1 = Data('train.csv','train_labels.txt',0.30,'test.csv');
 	
     data1.inputPreprocess();
 	
