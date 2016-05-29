@@ -94,9 +94,9 @@ class Model:
         model.fit(data.trainInputs, data.trainTargets, nb_epoch = self.epochs, batch_size = 32, callbacks = [history]);
         predictions = model.predict(data.testInputs);
 		
-        print '*****PREDICTIONS*****'
+        print('*****PREDICTIONS*****')
 		
-        print predictions
+        print(predictions)
         np.savetxt('./predictions.csv', predictions,delimiter=',')
         plt.figure()
         plt.plot(history.losses)
@@ -105,20 +105,20 @@ class Model:
 		
 def main():
 	
-    activation = np.array(['relu','relu'],dtype=object)
+    activation = np.array(['tanh','relu'],dtype=object)
 	
     error_function = 'mse'
-    optimizer_model = 'sgd'
+    optimizer_model = 'RMSprop'
 	
     data1 = Data('train.csv','train_labels.txt',0.30,'test.csv');
 	
     data1.inputPreprocess();
 	
-    model1 = Model(150,activation,optimizer_model);
+    model1 = Model(200,activation,optimizer_model);
 	
     model1.modelTrainValidate(data1);
 	
 	
 if __name__ == "__main__":
     main()
-	
+
