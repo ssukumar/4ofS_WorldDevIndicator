@@ -154,7 +154,7 @@ def main():
 
 if __name__ == "__main__":
     results = pd.DataFrame(main(),columns=['run_0'],index=[range(1,4305)])
-    for i in range(1):
+    for i in range(100):
         results['run_' + str(i+1)] = main()
 
     results.T.mean().to_csv('./ensemble.csv', sep=',')
