@@ -58,7 +58,7 @@ class Model:
 
     def __init__(self,neurons,activation,
                  optimizer,errFunc = 'mse',
-                 epochs=200, wd= 0.01,dropout = 0.0):
+                 epochs=500, wd= 0.01,dropout = 0.0):
         self.neurons = neurons;
         self.errFunc = errFunc;
         self.activation = activation;
@@ -82,8 +82,10 @@ class Model:
 		# Build the NN model
 		
         model = Sequential();
-        model.add(Dense(self.neurons,input_dim = data.features,init = 'glorot_uniform', W_regularizer = l2(self.wd),activation=self.activation[0]));
+        model.add(Dense(self.neurons[0],input_dim = data.features,init = 'glorot_uniform', W_regularizer = l2(self.wd),activation=self.activation[0]));
         model.add(Dropout(self.dropout));
+        model.add(Dense(self.neurons[1], init = 'glorot_uniform', activation = self.activation[0]));
+        model.add(Dropout(self.dropout))
         model.add(Dense(1,activation = self.activation[1]));
         model.compile(loss = self.errFunc, optimizer = self.optimizer);
 		
@@ -91,9 +93,10 @@ class Model:
 		
 		# Train the model
 		
-        model.fit(data.trainInputs, data.trainTargets, nb_epoch = self.epochs, batch_size = 32, callbacks = [history]);
-        predictions = model.predict(data.testInputs);
-		
+        model.fit(data.trainInputs, data.trainTargets, nb_epoch = self.epochs,validation_split = 0.30, batch_size = 32, callbacks = [history]);
+        #predictions = 
+        return(model.predict(data.testInputs))
+
         print('*****PREDICTIONS*****')
 		
         print(predictions)
@@ -109,16 +112,20 @@ def main():
 	
     error_function = 'mse'
     optimizer_model = 'RMSprop'
-	
+    neurons = [250, 50]
+
     data1 = Data('train.csv','train_labels.txt',0.30,'test.csv');
 	
     data1.inputPreprocess();
 	
-    model1 = Model(200,activation,optimizer_model);
+    model1 = Model(neurons,activation,optimizer_model);
 	
-    model1.modelTrainValidate(data1);
-	
-	
+    return(model1.modelTrainValidate(data1))	
+
 if __name__ == "__main__":
-    main()
+    results = pd.DataFrame(main(),columns=['run_0'],index=[range(1,4305)])
+    for i in range(100):
+        results['run_' + str(i+1)] = main()
+
+    results.T.mean().to_csv('./ensemble.csv', sep=',')
 
