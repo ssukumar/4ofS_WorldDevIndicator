@@ -93,7 +93,7 @@ class Model:
 		
 		# Train the model
 		
-        model.fit(data.trainInputs, data.trainTargets, nb_epoch = self.epochs,validation_split = 0.30, batch_size = 32, callbacks = [history]);
+        model.fit(data.trainInputs, data.trainTargets, nb_epoch = self.epochs,validation_split = 0.00, batch_size = 32, callbacks = [history]);
         #predictions = 
         return(model.predict(data.testInputs))
 
@@ -128,5 +128,5 @@ if __name__ == "__main__":
         results['run_' + str(i+1)] = main()
 
     results.T.mean().to_csv('./ensemble.csv', sep=',')
-    print(mean(results.T.std()))
+    results.T.std().to_csv('./ensemle_std.csv',sep=',')
 
