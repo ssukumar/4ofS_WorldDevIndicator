@@ -128,4 +128,5 @@ if __name__ == "__main__":
         results['run_' + str(i+1)] = main()
 
     results.T.mean().to_csv('./ensemble.csv', sep=',')
+    print(mean(results.T.std()))
 
