@@ -30,12 +30,10 @@ class Data:
         trainData = trainData.replace(-1,np.nan)
         testData = testData.replace(-1,np.nan)
         self.features = trainData.shape[1];
-        testData = testData.fillna(testData.mean())
-        trainData = trainData.fillna(trainData.mean())
         # [self.trainInputs, self.valInputs, self.trainTargets, self.valTargets] = train_test_split(trainData,trainLabel ,test_size = self.valRatio)
 
-        self.trainInputs = trainData.as_matrix()
-        self.testInputs = testData.as_matrix()
+        self.trainInputs = self.randfill(trainData) #trainData.as_matrix()
+        self.testInputs = self.randfill(testData) #testData.as_matrix()
         self.trainTargets = trainLabel.as_matrix()
         self.trainMean = np.mean(self.trainInputs,axis=0)
         #self.testMean = np.mean(self.trainInputs_t,axis=0)
@@ -45,6 +43,20 @@ class Data:
         self.testInputs = z_score_inputs(self.testInputs,self.trainMean,self.trainStd)
 #       self.valInputs = z_score_inputs(self.valInputs,self.trainMean,self.trainStd);
         
+    def randfill(self,data):
+        data1 = data.as_matrix()
+        r_c = np.shape(data1)
+        for col in range(r_c[1]):
+            col_idx = np.isnan(data1[:,col])
+            mu = np.nanmean(data1[:,col])
+            sigma = np.nanstd(data1[:,col])
+            n = sum(col_idx)
+            fill_values = np.random.normal(mu,sigma,n)
+            data1[:,col][col_idx] = fill_values[:]
+             #data.loc[col] = data1[col]
+             #data.ix[:,col] = data.ix[:,col]
+        print(data1)
+        return(data1)
         
 def z_score_inputs(Inputs, Mean, StdDev):
     """ 
