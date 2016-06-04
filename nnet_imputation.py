@@ -139,9 +139,9 @@ def main():
 
 if __name__ == "__main__":
     results = pd.DataFrame(main(),columns=['run_0'],index=[range(1,4305)])
-   for i in range(100):
-       results['run_' + str(i+1)] = main()
-       print(str(i) + ' % done')
+    for i in range(100):
+        results['run_' + str(i+1)] = main()
+        print(str(i) + ' % done')
 
     results.T.mean().to_csv('./ensemble.csv', sep=',')
     results.T.std().to_csv('./ensemle_std.csv',sep=',')
