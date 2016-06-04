@@ -129,15 +129,17 @@ def main():
     optimizer_model = 'RMSprop'
     neurons = [250, 50]
 
-    data1 = Data('train.csv','train_labels.txt',0.30,'test.csv');
     
-    data1.inputPreprocess();
     
     model1 = Model(neurons,activation,optimizer_model);
     
     return(model1.modelTrainValidate(data1))    
 
 if __name__ == "__main__":
+
+    data1 = Data('train.csv','train_labels.txt',0.30,'test.csv');
+    data1.inputPreprocess();
+    
     results = pd.DataFrame(main(),columns=['run_0'],index=[range(1,4305)])
     for i in range(100):
         results['run_' + str(i+1)] = main()
